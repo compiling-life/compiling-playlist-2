@@ -210,21 +210,71 @@
         }
 
         // Load playlist from URL
-        loadPlaylistBtn.addEventListener('click', () => {
-            const url = playlistUrlInput.value.trim();
-            if (!url) {
-                showError('Please enter a YouTube playlist URL');
-                return;
-            }
+        loadPlaylistBtn.addEventListener('click', async () => {
+    const url = playlistUrlInput.value.trim();
+    if (!url) {
+        showError('Please enter a YouTube playlist or video URL');
+        return;
+    }
 
-            playlistId = extractPlaylistId(url);
-            if (!playlistId) {
-                showError('Invalid YouTube playlist URL');
-                return;
-            }
+    const playlistId = extractPlaylistId(url);
+    const videoId = extractVideoId(url);
 
-            fetchPlaylist(playlistId);
-        });
+    if (playlistId) {
+        // Load playlist as before
+        await fetchPlaylist(playlistId);
+    } else if (videoId) {
+        // Add single video to the top of the playlist
+        await fetchSingleVideo(videoId);
+    } else {
+        showError('Invalid YouTube URL');
+    }
+});
+
+function extractVideoId(url) {
+    // Match regular YouTube video URLs, short links, and embed URLs
+    const regExp = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
+}
+
+async function fetchSingleVideo(videoId) {
+    try {
+        showLoading();
+
+        // Fetch video details using YouTube API
+        const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=AIzaSyBLO2IXhfYHkPBbFki6ZIeacE8ul1GuDSw`);
+        const data = await response.json();
+
+        if (!data.items || data.items.length === 0) {
+            throw new Error('Video not found');
+        }
+
+        const videoItem = {
+            snippet: data.items[0].snippet,
+            // Since playlistItems expects a similar shape, we fake resourceId for consistency
+            snippet: {
+                ...data.items[0].snippet,
+                resourceId: { videoId: videoId }
+            }
+        };
+
+        // Add video at the start of the playlist
+        playlistItems.unshift(videoItem);
+        originalPlaylistOrder = [...playlistItems];
+        currentVideoIndex = 0;
+
+        updatePlaylistUI();
+        updatePlaylistInfo();
+        loadVideo(currentVideoIndex);
+
+    } catch (error) {
+        console.error('Error fetching video:', error);
+        showError('Failed to load video. Please check the URL and try again.');
+    }
+}
+
+
 
         function extractPlaylistId(url) {
             const regExp = /^.*(youtu.be\/|list=)([^#\&\?]*).*/;
