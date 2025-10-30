@@ -140,9 +140,7 @@ Load
 
 <div class="p-4 bg-gray-50 border-t">
 
-<div class="flex items-center justify-between mb-4">
-
-<div>
+<div class="mb-2">
 
 <h2 id="currentVideoTitle" class="text-xl font-semibold text-gray-800 truncate">No video selected</h2>
 
@@ -150,7 +148,7 @@ Load
 
 </div>
 
-<div class="flex items-center space-x-2">
+<div class="flex items-center space-x-2 mb-4">
 
 <button id="loopBtn" class="p-2 rounded-full hover:bg-gray-200" title="Loop">
 
@@ -166,7 +164,6 @@ Load
 
 </div>
 
-</div>
 
 <div class="flex items-center justify-center space-x-6">
 
@@ -532,20 +529,6 @@ function updatePlaylistInfo()
 
 function loadVideo(index) 
 {
-    if ('mediaSession' in navigator) 
-    {
-    navigator.mediaSession.metadata = new MediaMetadata(
-    {
-        title: playlistItems[index].snippet.title,
-        artist: playlistItems[index].snippet.videoOwnerChannelTitle || 'Unknown',
-        album: 'YouTube Playlist',
-        artwork: 
-        [
-            { src: playlistItems[index].snippet.thumbnails.medium.url, sizes: '320x180', type: 'image/png' }
-        ]
-    });
-    }
-
     if (index < 0 || index >= playlistItems.length) return;
     
     currentVideoIndex = index;
@@ -743,27 +726,6 @@ document.addEventListener('keydown', (e) =>
         prevBtn.click();
     }
 });
-
-if ('mediaSession' in navigator) 
-{
-    navigator.mediaSession.metadata = new MediaMetadata(
-    {
-        title: playlistItems[currentVideoIndex]?.snippet.title || 'No video',
-        artist: playlistItems[currentVideoIndex]?.snippet.videoOwnerChannelTitle || 'Unknown',
-        album: 'YouTube Playlist',
-        artwork: 
-        [
-            { src: playlistItems[currentVideoIndex]?.snippet.thumbnails.medium.url, sizes: '320x180', type: 'image/png' }
-        ]
-    });
-
-    navigator.mediaSession.setActionHandler('nexttrack', () => playNextVideo());
-
-    navigator.mediaSession.setActionHandler('previoustrack', () => playPrevVideo());
-
-    navigator.mediaSession.setActionHandler('previoustrack', () => playPrevVideo());
-}
-
 
 </script>
 
