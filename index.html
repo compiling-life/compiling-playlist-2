@@ -730,6 +730,20 @@ document.addEventListener('keydown', (e) =>
     }
 });
 
+if ('mediaSession' in navigator) 
+{
+    navigator.mediaSession.setActionHandler('nexttrack', () => 
+    {
+        playNextVideo();
+    });
+
+    navigator.mediaSession.setActionHandler('previoustrack', () => 
+    {
+        playPrevVideo();
+    });
+}
+
+
 </script>
 
 </body>
