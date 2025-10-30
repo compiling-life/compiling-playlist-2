@@ -532,6 +532,20 @@ function updatePlaylistInfo()
 
 function loadVideo(index) 
 {
+    if ('mediaSession' in navigator) 
+    {
+    navigator.mediaSession.metadata = new MediaMetadata(
+    {
+        title: playlistItems[index].snippet.title,
+        artist: playlistItems[index].snippet.videoOwnerChannelTitle || 'Unknown',
+        album: 'YouTube Playlist',
+        artwork: 
+        [
+            { src: playlistItems[index].snippet.thumbnails.medium.url, sizes: '320x180', type: 'image/png' }
+        ]
+    });
+    }
+
     if (index < 0 || index >= playlistItems.length) return;
     
     currentVideoIndex = index;
@@ -732,15 +746,22 @@ document.addEventListener('keydown', (e) =>
 
 if ('mediaSession' in navigator) 
 {
-    navigator.mediaSession.setActionHandler('nexttrack', () => 
+    navigator.mediaSession.metadata = new MediaMetadata(
     {
-        playNextVideo();
+        title: playlistItems[currentVideoIndex]?.snippet.title || 'No video',
+        artist: playlistItems[currentVideoIndex]?.snippet.videoOwnerChannelTitle || 'Unknown',
+        album: 'YouTube Playlist',
+        artwork: 
+        [
+            { src: playlistItems[currentVideoIndex]?.snippet.thumbnails.medium.url, sizes: '320x180', type: 'image/png' }
+        ]
     });
 
-    navigator.mediaSession.setActionHandler('previoustrack', () => 
-    {
-        playPrevVideo();
-    });
+    navigator.mediaSession.setActionHandler('nexttrack', () => playNextVideo());
+
+    navigator.mediaSession.setActionHandler('previoustrack', () => playPrevVideo());
+
+    navigator.mediaSession.setActionHandler('previoustrack', () => playPrevVideo());
 }
 
 
